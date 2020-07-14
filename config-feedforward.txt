@@ -5,7 +5,7 @@ fitness_criterion     = max
 # fitness level to get to before terminating program
 fitness_threshold     = 100
 # number of species at all times
-pop_size              = 100
+pop_size              = 20
 # don't reset a species if it goes extinct (may inhibit innovation, but we're ok)
 reset_on_extinction   = False
 
