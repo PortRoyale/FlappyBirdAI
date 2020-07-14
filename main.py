@@ -3,11 +3,16 @@ import neat
 import time
 import os
 import random
-
-WIN_WIDTH = 576
-WIN_HEIGHT = 800
-###############
 pygame.init()
+
+# size of game window
+WIN_WIDTH = 550
+WIN_HEIGHT = 800
+
+# center window
+os.environ['SDL_VIDEO_CENTERED'] = '1'
+###############
+
 
 # scale2x makes images 2 times bigger
 BIRD_IMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird1.png"))), pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird2.png"))), pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird3.png")))]
@@ -15,6 +20,8 @@ PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "pipe
 BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "base.png")))
 BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png")))
 
+STAT_FONT = pygame.font.SysFont("Cascadia Code", 50)
+# SCORE_FONT = pygame.font.SysFont("Cascadia Code", 50)
 
 
 class Bird: #  for making flappy birds
@@ -157,11 +164,14 @@ class Base: # this is the floor of the graphics
 		win.blit(self.IMG, (self.x2, self.y))
 
 
-def draw_window(win, bird, pipes, base): # window, bird
+def draw_window(win, bird, pipes, base, score): # window, bird
 	win.blit(BG_IMG, (0,0)) # blit = 'draw'
 
 	for pipe in pipes:
 		pipe.draw(win)
+
+	text = STAT_FONT.render("Score: " + str(score), 1, (255, 255, 255))
+	win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 10))
 
 	base.draw(win)
 
@@ -200,7 +210,7 @@ def main():
 			if pipe.x + pipe.PIPE_TOP.get_width() < 0:
 				rem.append(pipe)
 
-			if not pipe.passed and pipe.x < bird.x:
+			if not pipe.passed and pipe.x + bird.img.get_width() < bird.x:
 				pipe.passed = True
 				add_pipe = True
 
@@ -212,8 +222,12 @@ def main():
 
 		for r in rem:
 			pipes.remove(r)
+        
+        # hitting the floor
+		if bird.y + bird.img.get_height() >= 730:
+			pass
 
-		draw_window(win, bird, pipes, base)
+		draw_window(win, bird, pipes, base, score)
 
 	pygame.quit()
 	quit()
