@@ -5,7 +5,7 @@ fitness_criterion     = max
 # fitness level to get to before terminating program
 fitness_threshold     = 100
 # number of species at all times
-pop_size              = 20
+pop_size              = 10
 # don't reset a species if it goes extinct (may inhibit innovation, but we're ok)
 reset_on_extinction   = False
 
@@ -35,8 +35,8 @@ compatibility_disjoint_coefficient = 1.0
 compatibility_weight_coefficient   = 0.5
 
 # connection add/remove rates
-conn_add_prob           = 0.5
-conn_delete_prob        = 0.5
+conn_add_prob           = 0.2
+conn_delete_prob        = 0.2
 
 # connection enable options
 enabled_default         = True

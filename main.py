@@ -12,7 +12,7 @@ WIN_HEIGHT = 800
 FLOOR = 730
 STAT_FONT = pygame.font.SysFont("Cascadia Code", 50)
 END_FONT = pygame.font.SysFont("Cascadia Code", 70)
-DRAW_LINES = False
+DRAW_LINES = True
 os.environ['SDL_VIDEO_CENTERED'] = '1'  # center window
 
 WIN = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
@@ -109,13 +109,12 @@ class Bird:
 
 
 class Pipe:  # the classic green mario pipes
-    GAP = 200
+    GAP = 170
     VEL = 5
 
     def __init__(self, x):
         self.x = x
         self.height = 0
-        self.gap = 100
 
         self.top = 0
         self.bottom = 0
