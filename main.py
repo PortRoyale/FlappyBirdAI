@@ -1,10 +1,18 @@
 import pygame
+from pygame.locals import *
 import neat
 import time
 import os
 import random
-# import pickle
-pygame.font.init()
+import pickle
+pygame.init()
+
+
+DRAW_LINES = True
+
+
+WINNING_SCORE = 5
+MAX_GENERATIONS = 20
 
 
 WIN_WIDTH = 550
@@ -12,9 +20,24 @@ WIN_HEIGHT = 800
 FLOOR = 730
 STAT_FONT = pygame.font.SysFont("Cascadia Code", 50)
 END_FONT = pygame.font.SysFont("Cascadia Code", 70)
-DRAW_LINES = True
 os.environ['SDL_VIDEO_CENTERED'] = '1'  # center window
 
+#colors 
+black = (0,0,0)
+white = (255,255,255)
+blue =(53, 115, 255)
+red = (200,0,0)
+green = (0, 200, 0)
+bright_red = (255,0,0)
+bright_green = (0,255,0)
+
+
+global WIN, gen, clock, pause
+
+
+pause = False
+clock = pygame.time.Clock()
+gen = 0  # initilize 0th generation
 WIN = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Flappy Bird")
 
@@ -28,8 +51,6 @@ BASE_IMG = pygame.transform.scale2x(
     pygame.image.load(os.path.join("imgs", "base.png")))
 BG_IMG = pygame.transform.scale2x(
     pygame.image.load(os.path.join("imgs", "bg.png")))
-
-gen = 0  # initilize 0th generation
 
 
 class Bird:
@@ -196,7 +217,7 @@ def blitRotateCenter(surf, image, topleft, angle):
     surf.blit(rotated_image, new_rect.topleft)
 
 
-def draw_window(win, birds, pipes, base, score, gen, pipe_ind):
+def draw_window(win, birds, pipes, base, score, pipe_ind):
     # """
  #    draws the windows for the main game loop
  #    :param win: pygame window surface
@@ -207,6 +228,8 @@ def draw_window(win, birds, pipes, base, score, gen, pipe_ind):
  #    :param pipe_ind: index of closest pipe
  #    :return: None
  #    """
+
+    global gen
     if gen == 0:
         gen = 1
     win.blit(BG_IMG, (0, 0))
@@ -244,14 +267,69 @@ def draw_window(win, birds, pipes, base, score, gen, pipe_ind):
     pygame.display.update()
 
 
+def button(msg, x, y, w, h, ic, ac, action=None): 
+    """message, dimension, active/inactive color"""
+
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+    #print(mouse)
+
+    if x+w > mouse[0] > x and y+h > mouse[1] > y:
+        pygame.draw.rect(WIN, ac,(x, y,w,h))
+        if click[0] == 1 and action != None:
+            action()
+
+    else:
+        pygame.draw.rect(WIN, ic,(x, y,w,h))
+
+    smallText = pygame.font.SysFont("Cascadia Code",20)
+    textSurf, textRect = text_object(msg, smallText)
+    textRect.center = ( (x+(w/2)), (y+(h/2)) )
+    WIN.blit(textSurf, textRect)
+
+
+def unpause():
+    pause = False
+
+def game_pause(pause):
+    ############
+    # pygame.mixer.music.pause()
+    #############
+
+    print("PAUSE", pause)
+
+    while pause:
+
+        #gameDisplay.fill(white)
+        largeText = pygame.font.SysFont("comicsansms",90)
+        textSurf, textRect = text_object("Pause!", largeText)
+        textRect.center = ((WIN_WIDTH/2) , (WIN_HEIGHT/4))
+        WIN.blit(textSurf, textRect)
+
+        button("Continue?", 150,250,100,50, green, bright_green, game_unpause)
+
+
+        # button("Quit", 550,250,100,50, red, bright_red, quitgame)
+
+
+        pygame.display.update()
+        clock.tick(30)
+
+def text_object(text, font):
+    textSurface = font.render(text, True, black)
+    return textSurface, textSurface.get_rect()
+
+
 def eval_genomes(genomes, config):
     # """
     # runs the simulation of the current population of
     # birds and sets their fitness based on the distance they
     # reach in the game.
     # """
-    global WIN, gen
+
     win = WIN
+
+    global gen
     gen += 1
 
     # start by creating lists holding the genome itself, the
@@ -272,18 +350,42 @@ def eval_genomes(genomes, config):
     pipes = [Pipe(700)]
     score = 0
 
-    clock = pygame.time.Clock()
+
 
     run = True
+    pause = False
     while run and len(birds) > 0:
         clock.tick(30)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        # Event Handler (quit, pause, restart, etc.)
+        for event in pygame.event.get(): 
+            print(event)
+
+
+            if event.type == pygame.QUIT: # close window closes app
                 run = False
                 pygame.quit()
                 quit()
                 break
+            elif event.type == pygame.KEYUP and event.key == pygame.K_p: # this is how we will pause
+                pause = True
+                print("pause true") 
+
+                clock.tick(10)               
+            elif pause:
+                if event.type == pygame.KEYUP and event.key == pygame.K_p:
+                    pause = False
+                    print("unpause")
+
+                    # pygame.display.update()
+                    # clock.tick(15)
+
+            elif score == WINNING_SCORE:
+                # SAVE WINNING GENOME(s) and STATS HERE
+                # maybe output a winning screen
+                pass
+            else:
+                pass
 
         pipe_ind = 0
         if len(birds) > 0:
@@ -342,12 +444,12 @@ def eval_genomes(genomes, config):
                 ge.pop(birds.index(bird))
                 birds.pop(birds.index(bird))
 
-        draw_window(WIN, birds, pipes, base, score, gen, pipe_ind)
+        draw_window(WIN, birds, pipes, base, score, pipe_ind)
 
         # break if score gets large enough
-        '''if score > 20:
-            pickle.dump(nets[0],open("best.pickle", "wb"))
-            break'''
+        # if score > 3:
+        #     pickle.dump(nets[0],open("best.pickle", "wb"))
+        #     break
 
 
 def run(config_file):
@@ -363,8 +465,8 @@ def run(config_file):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-    # run for up to 50 generations
-    winner = p.run(eval_genomes, 50)
+    # run for up to MAX_GENERATIONS generations
+    winner = p.run(eval_genomes, MAX_GENERATIONS)
 
     # show final stats
     print('\nBest genome:\n{!s}'.format(winner))

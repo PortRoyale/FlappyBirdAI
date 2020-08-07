@@ -5,7 +5,7 @@ fitness_criterion     = max
 # fitness level to get to before terminating program
 fitness_threshold     = 100
 # number of species at all times
-pop_size              = 10
+pop_size              = 20
 # don't reset a species if it goes extinct (may inhibit innovation, but we're ok)
 reset_on_extinction   = False
 
@@ -47,8 +47,8 @@ feed_forward            = True
 initial_connection      = full
 
 # node add/remove rates
-node_add_prob           = 0.2
-node_delete_prob        = 0.2
+node_add_prob           = 0.5
+node_delete_prob        = 0.5
 
 ###### MOST IMPORTANT #######
 # network parameters
